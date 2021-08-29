@@ -31,7 +31,7 @@ public class Card {
     /*
      * Returns value in string form
      */
-    public String getStringValue() {
+    public String getValue() {
         return this.value;
     }
     

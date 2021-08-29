@@ -5,7 +5,7 @@ public class Deck {
     // testing changes 1234daf
     // final static variables
     private static final int NUM_DECK_CARDS = 52;
-    private static final String[] values = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J","Q","K","A" };
+    private static final String[] values = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J","Q","K","A" };
     private static final String[] suits = {"H", "S", "C", "D"};  
     
     // class fields
@@ -31,9 +31,9 @@ public class Deck {
      */
     public void shuffle() {
         Random r = new Random();
-        for(int i = 0; i < this.deck.size() - 1; i++) {
+        for(int i = this.deck.size() - 1; i > 0; i--) {
             int rand = r.nextInt(i + 1);
-            Card temp = this.deck.get(rand);
+            Card temp = this.deck.get(i);
             this.deck.set(i, this.deck.get(rand));
             this.deck.set(rand, temp);
         }
@@ -53,6 +53,12 @@ public class Deck {
      */
     public int getNumCards() {
         return current_num_cards;
+    }
+    
+    public void printDeck() {
+        for(Card c : this.deck) {
+            System.out.println(c.getSuit() + " " + c.getValue());
+        }
     }
     
     

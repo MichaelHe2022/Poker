@@ -22,26 +22,19 @@ public class Player {
      */    
     public Player() {
         this.hand = new ArrayList<Card>();
-        this.score = 0;
     }
     
     /*
      * returns current hand
-     */  
+     */
+    
     public List<Card> getHand() {
         return this.hand;
     }
     
-    /*
-     * returns score
-     */  
-    public int getScore() {
-        return this.score;
-    }
-    
     
     /*
-     * Implements bucket sort to sort hand
+     * uses bucket sort to sort cards in hand
      * 
      * returns sorted hand by card value
      */   
@@ -51,43 +44,39 @@ public class Player {
         for (int i = 0; i < hand.size(); i++)
             buckets.add(new ArrayList<Card>());
         
-        // cards range from 2-14 with 5 buckets, implement hashing function
-        for (Card c : hand) {
-            int index = (int) Math.floor(c.getIntValue() / 3.0);            
-            buckets.get(index).add(c);
-        }
+        // Distributes cards into buckets (based on card value)
+        for (Card c : hand) 
+            buckets.get((int)Math.ceil(c.getIntValue()/3.0)-1).add(c);
         
-        // Sort each individual bucket
-        for(ArrayList<Card> bucket : buckets) {
-            bucket = insertionSortHelper(bucket);
-        }   
+        // sort each bucket using insertionSort
+        for(int i = 0; i < buckets.size(); i++ ) {
+            buckets.set(i, insertionSortHelper(buckets.get(i)));
+        }
+        // Merge buckets into a single list
+        ArrayList<Card> finalList = new ArrayList<Card>();
+        for (ArrayList<Card> bucket : buckets)
+            finalList.addAll(bucket);
   
-        // Merge all sorted buckets into final list
-        ArrayList<Card> merged = new ArrayList<Card>();
-        for (ArrayList<Card> bucket : buckets) {
-            merged.addAll(bucket);
-        }
         
-        return merged;
-   
-      
+        return finalList; 
     }
     
     /*
-     * uses Insertion sort to sort each individual bucket from buckets
-     * @param bucket
+     * uses insertion sort for each bucket 
      * 
-     * return sorted bucket
+     * @param bucket: one bucket from bucketsort
+     * returns sorted bucket
      */
     private ArrayList<Card> insertionSortHelper(ArrayList<Card> bucket) {
         for(int i = 1; i < bucket.size(); i++) {
+            Card temp = bucket.get(i);
             int j = i - 1;
-            while(j >= 0 && bucket.get(j).getIntValue() > bucket.get(i).getIntValue()) {
+            while(j >= 0 && bucket.get(j).getIntValue() > temp.getIntValue()) {
                 bucket.set(j+1, bucket.get(j));
                 j--;
             }
             
-            bucket.set(j+1, bucket.get(i));
+            bucket.set(j+1, temp);
         }
         return bucket;
     }
@@ -95,12 +84,13 @@ public class Player {
     /*
      * Evaluates hand based on Straight, flush, two pair, three pair, etc.
      * 
-     * @param sortedHand
+     * @param communityCards
      * 
      * returns score based on two hole cards + community cards
      */
     public int scoreHand(List<Card> communityCards) {
         
+        // gets a list of all 7 cards = 2 hole cards + 5 community cards
         List<Card> all = new ArrayList<>();
         for(Card c : communityCards) {
             all.add(c);
@@ -108,17 +98,11 @@ public class Player {
         for(Card c : this.hand) {
             all.add(c);
         }
-        
-        System.out.print("ALL CARDS: ");
-        for(Card c : all) {
-            System.out.print(c.getSuit() + "" + c.getIntValue() + " ");
-        }
-        
-        System.out.println();
+
+        // sets hand back to empty
         this.hand = new ArrayList<>();
         
-        System.out.println("Reached");
-        
+        // Check all 5 card combinations from the 7 total cards - 7 choose 5 = 21 combinations every time
         for(int first = 0; first < all.size() - 4; first++) {
             this.hand.add(all.get(first));
             for(int second = first + 1; second < all.size(); second++) {
@@ -130,15 +114,11 @@ public class Player {
                         for(int fifth = fourth + 1; fifth < all.size(); fifth++) {
                             this.hand.add(all.get(fifth));
                             
-                            for(Card c : this.hand) {
-                                System.out.print(c.getSuit() + "" + c.getIntValue() + " ");
-                               
-                            }
-                            System.out.println();
-                            // score starts with high card
+                            // default score starts with high card
                             int tempScore = findMax();
                             
-                            this.sortHand();
+                            // set hand to sorted hand
+                            this.hand = this.sortHand();
                            
                             
                             // Check tier list from top to bottom
@@ -167,6 +147,7 @@ public class Player {
                                 tempScore += PAIR;
                             }
                             
+                            // checks if temp score is higher than current score
                             this.score = Math.max(tempScore, this.score);
                             
                             this.hand.remove(all.get(fifth));                          
@@ -183,7 +164,14 @@ public class Player {
         return this.score;
     }
     
+    /*
+     * Checks if hand contains 2 cards with same value
+     * 
+     * returns true if a pair exists, false otherwise
+     */
     private boolean checkPair() {
+        
+        // maps each value to its frequency
         Map<String, Integer> hm = new HashMap<>();
         for(Card c : this.hand) {
             if(!hm.containsKey(c.getValue())) {
@@ -194,6 +182,7 @@ public class Player {
             }
         }       
         
+        // checks if any frequency is 2
         for(int value : hm.values()) {
             if(value == 2) {
                 return true;
@@ -202,7 +191,13 @@ public class Player {
         return false;
     }
 
+    /*
+     * Checks if hand contains 2 pair
+     * 
+     * returns true if 2 pair exists, false otherwise
+     */
     private boolean checkTwoPair() {
+        // maps each card value to its frequency
         Map<String, Integer> hm = new HashMap<>();
         for(Card c : this.hand) {
             if(!hm.containsKey(c.getValue())) {
@@ -213,6 +208,7 @@ public class Player {
             }
         }  
         
+        // checks if 2 frequency values are present - 2 pair
         int twoCount = 0;
         for(int value : hm.values()) {
             if(value == 2) {
@@ -223,7 +219,13 @@ public class Player {
         return twoCount == 2 ? true : false;
     }
 
+    /*
+     * Checks if hand contains 3 of a kind
+     * 
+     * returns true if 3 of a kind exists, false otherwise
+     */
     private boolean checkThreeKind() {
+        // maps each card value to its frequency
         Map<String, Integer> hm = new HashMap<>();
         for(Card c : this.hand) {
             if(!hm.containsKey(c.getValue())) {
@@ -234,6 +236,7 @@ public class Player {
             }
         }       
         
+        // checks if any of the frequency values are equal to 3
         for(int value : hm.values()) {
             if(value == 3) {
                 return true;
@@ -242,12 +245,45 @@ public class Player {
         return false;
     }
 
+    /*
+     * Checks if hand contains full house - 3 of a kind + a pair
+     * 
+     * returns true if full house exists, false otherwise
+     */
     private boolean fullHouse() {
-        // TODO Auto-generated method stub
-        return false;
+        // maps each card value to its frequency
+        Map<String, Integer> hm = new HashMap<>();
+        for(Card c : this.hand) {
+            if(!hm.containsKey(c.getValue())) {
+                hm.put(c.getValue(), 1);
+            }
+            else {
+                hm.put(c.getValue(), hm.get(c.getValue()) + 1);
+            }
+        }  
+        
+        // checks hm contains 3 of a kind + pair
+        boolean twoPair = false;
+        boolean threeKind = false;
+        for(int value : hm.values()) {
+            if(value == 2) {
+                twoPair = true;
+            }
+            else if(value == 3) {
+                threeKind = true;
+            }
+        }
+        
+        return twoPair && threeKind;
     }
 
+    /*
+     * Checks if hand contains 4 of a kind
+     * 
+     * returns true if 4 of a kind exists, false otherwise
+     */
     private boolean fourKind() {
+        // maps each card value to its frequency
         Map<String, Integer> hm = new HashMap<>();
         for(Card c : this.hand) {
             if(!hm.containsKey(c.getValue())) {
@@ -258,6 +294,7 @@ public class Player {
             }
         }       
         
+        // check if any frequency is 4
         for(int value : hm.values()) {
             if(value == 4) {
                 return true;
@@ -285,7 +322,8 @@ public class Player {
      * 
      * return true if flush, false otherwise
      */
-    private boolean checkFlush() {        
+    private boolean checkFlush() {    
+        // maps each card value to its frequency
         Map<String, Integer> hm = new HashMap<>();
         for(Card c : this.hand) {
             if(!hm.containsKey(c.getSuit())) {
@@ -294,10 +332,16 @@ public class Player {
             else {
                 hm.put(c.getSuit(), hm.get(c.getSuit()) + 1);
             }
-        }       
+        } 
+        // checks if only 1 suit exists in hm
         return hm.size() == 1 ? true : false;       
     }
     
+    /*
+     * Check if hand contains straight
+     * 
+     * return true if straight, false otherwise
+     */
     private boolean checkStraight() {
         boolean isStraight = true;
         for(int i = 1; i < this.hand.size(); i++) {
@@ -307,16 +351,19 @@ public class Player {
         }
         return isStraight;
     }
-
+  
 
     /*
      * prints out all of the cards in the players hand (includes communal cards)
      */
     public void printHand() {
-        System.out.println("Current Hand: ");
-        
         for(Card c : hand) {
-            System.out.println(c.getSuit() + " " + c.getValue());
+            System.out.print(c.getSuit() + "" + c.getValue() + " ");
         }
+        System.out.println();
     }
+    
+   
+    
+    
 }

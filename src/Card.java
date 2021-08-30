@@ -3,10 +3,9 @@ import java.util.Map;
 
 public class Card {
 
-    // fieldsssssssss
+    // fields
     private String suit;
     private String value;
-    private Map<String, Integer> hm;
     
     /*
      * Constructor for a single playing card
@@ -14,11 +13,6 @@ public class Card {
     public Card(String suit, String value) {
         this.suit = suit;
         this.value = value;
-        hm = new HashMap<>();
-        hm.put("H", 1);
-        hm.put("S", 2);
-        hm.put("D", 3);
-        hm.put("C", 4);
     }
     
     /*
@@ -33,14 +27,6 @@ public class Card {
      */
     public String getValue() {
         return this.value;
-    }
-    
-    /*
-     * returns suit in int form
-     */
-    public int getIntSuit() {
-        
-        return this.hm.get(this.suit);
     }
     
     /*

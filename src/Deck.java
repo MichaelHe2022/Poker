@@ -43,9 +43,9 @@ public class Deck {
      * Retrieves top card of deck
      */
     public Card getTopCard() {
-        Card temp = this.deck.remove(0);
-        current_num_cards--;
-        return temp;
+         Card temp = this.deck.remove(0);
+         current_num_cards--;
+         return temp;
     }
     
     /*

@@ -354,7 +354,7 @@ public class Player {
   
 
     /*
-     * prints out all of the cards in the players hand (includes communal cards)
+     * prints out all of the cards in the players hand 
      */
     public void printHand() {
         for(Card c : hand) {
